@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Flex,
   Grid,
@@ -13,6 +14,7 @@ import { Input } from "../../components/Form/Input";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useState } from "react";
 
 const signInSchema = yup.object().shape({
   email: yup.string().required("Email obrigatorio").email("Email invalido"),
@@ -25,6 +27,8 @@ interface SignInData {
 }
 
 export const Login = () => {
+  const [loading, setLoading] = useState(false);
+
   const {
     formState: { errors },
     register,
@@ -34,7 +38,7 @@ export const Login = () => {
   });
 
   const handleSignIn = (data: SignInData) => {
-    void console.log(data);
+    console.log(data);
   };
 
   return (
@@ -72,14 +76,22 @@ export const Login = () => {
         >
           <Heading size="lg">Bem vindo de volta</Heading>
           <VStack mt="6" spacing="5">
-            <Input
-              placeholder="Digite seu email"
-              icon={FaEnvelope}
-              label="Login"
-              type="email"
-              error={errors.email}
-              {...register("email")}
-            />
+            <Box w="100%">
+              <Input
+                placeholder="Digite seu email"
+                icon={FaEnvelope}
+                label="Login"
+                type="email"
+                error={errors.email}
+                {...register("email")}
+              />
+              {!errors.email && (
+                <Text ml="1" mt="1" color="gray.400">
+                  Exemplo: nome@email.com
+                </Text>
+              )}
+            </Box>
+
             <Input
               placeholder="Digite sua senha"
               icon={FaLock}
@@ -89,7 +101,35 @@ export const Login = () => {
               {...register("password")}
             />
           </VStack>
-          <Button type="submit">Entrar</Button>
+          <VStack mt="4" spacing="5">
+            <Button
+              isLoading={loading}
+              bg="purple.800"
+              w="100%"
+              color="white"
+              h="60px"
+              borderRadius="8px"
+              _hover={{
+                backgroundColor: "purple.900",
+              }}
+              type="submit"
+            >
+              Entrar
+            </Button>
+            <Text color="gray.400">Ainda nao possui uma conta? </Text>
+            <Button
+              bg="gray.200"
+              w="100%"
+              color="grat.400"
+              h="60px"
+              borderRadius="8px"
+              _hover={{
+                backgroundColor: "gray.300",
+              }}
+            >
+              Registrar-se
+            </Button>
+          </VStack>
         </Grid>
       </Flex>
     </Flex>
