@@ -8,7 +8,14 @@ import {
   InputGroup,
 } from "@chakra-ui/react";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  ForwardRefRenderFunction,
+  forwardRef,
+} from "react";
 import { FieldError } from "react-hook-form";
 
 import { IconType } from "react-icons/lib";
@@ -20,19 +27,48 @@ interface InputProps extends ChakraInputProps {
   icon?: IconType;
 }
 
-export const Input = ({
-  name,
-  error = null,
-  icon: Icon,
-  label,
-  ...rest
-}: InputProps) => {
+type inputVariationOptions = {
+  [key: string]: string;
+};
+
+const inputVariation: inputVariationOptions = {
+  error: "red.500",
+  default: "gray.200",
+  focus: "purple.800",
+  filled: "green.500",
+};
+
+const InputBase: ForwardRefRenderFunction<HTMLInputElement, InputProps> = (
+  { name, error = null, icon: Icon, label, ...rest },
+  ref
+) => {
+  const [value, setValue] = useState("");
+  const [variation, setVariation] = useState("default");
+
+  useEffect(() => {
+    if (error) {
+      return setVariation("error");
+    }
+  }, [error]);
+
+  const handleInputFocus = useCallback(() => {
+    if (!error) {
+      setVariation("focus");
+    }
+  }, [error]);
+
+  const handleInputBlur = useCallback(() => {
+    if (value.length > 1 && !error) {
+      return setVariation("filled");
+    }
+  }, [error, value]);
+
   return (
-    <FormControl isRequired>
+    <FormControl isInvalid={!!error}>
       {!!label && <FormLabel>{label}</FormLabel>}
       <InputGroup flexDirection="column">
         {Icon && (
-          <InputLeftElement mt="2.5">
+          <InputLeftElement color={inputVariation[variation]} mt="2.5">
             <Icon />
           </InputLeftElement>
         )}
@@ -40,11 +76,17 @@ export const Input = ({
         <ChakraInput
           name={name}
           bg="gray.50"
+          color={inputVariation[variation]}
+          borderColor={inputVariation[variation]}
+          onChangeCapture={(e) => setValue(e.currentTarget.value)}
+          onFocus={handleInputFocus}
+          onBlurCapture={handleInputBlur}
           variant="outline"
           _hover={{ bgColor: "gray.100" }}
           _placeholder={{ color: "grey.300" }}
           size="lg"
           h="60px"
+          ref={ref}
           {...rest}
         />
 
@@ -53,3 +95,5 @@ export const Input = ({
     </FormControl>
   );
 };
+
+export const Input = forwardRef(InputBase);
